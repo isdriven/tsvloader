@@ -21,7 +21,7 @@ usage:
 
     local tsv =  tl.load(text)
 
-    local row = tsv:find_by("id", 10219)
+    local row = tsv:find_by("id", 2)
     local first = tsv.first
     local last = tsv.last
     
