@@ -4,7 +4,7 @@ tsv loader in pure lua.
 you can load tsv data sush as
 
     id	name	description
-    1	ever white	"the "dragon", 
+    1	ever white	"the ""dragon"", 
     the best creature in the world"
     2	shining "black"	other ways
     3	bloody blue	other ways
