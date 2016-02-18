@@ -1,0 +1,12 @@
+#### references
+
+tsvloader.load(text)
+	load from text, and return tsv data object
+
+tsvloader.load_from_file(file_name)
+	load from file_name, and return tsv data object
+
+tsv_data_object:find_by(name,value)
+	find from data rows by name = value
+
+

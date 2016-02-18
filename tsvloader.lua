@@ -23,7 +23,7 @@ local pos = 1
 local after_delimiter = false
 local tmp_body = ""
 
-function seek(text)
+function seek(text, titles, rows)
   from = pos
   local text_len = #text
   if from >= #text then
@@ -50,7 +50,7 @@ function seek(text)
   if f == nil then
     f = #text
   end
-  
+
   pos = f + 1
   ret_body = string.sub(text,from,f-1)
 
@@ -74,6 +74,9 @@ function seek(text)
 	end
       end
     elseif f == n then
+      if column == 1 then -- expect nil rows
+	return false
+      end
       if titles[column] ~= nil then
 	line[titles[column]] = table.concat({tmp_body,ret_body},"")
       end
@@ -81,13 +84,24 @@ function seek(text)
       column = 1
       table.insert(rows, line)
       line = {}
+    elseif f == q then
+      tmp_body = tmp_body..string.sub(text, from, q)
+      pos = f + 1
     end
   elseif mode == FETCHNG_MULTI then
-    -- see next quote
-    f = q
-    tmp_body = string.sub(text, from, q-1)
-    mode = FETCHNG_BODY
-    pos = f + 1
+    -- see next quote with next delimiter
+    next_d = string.find(text,delimiter,q)
+    next_n = string.find(text,"\n",q)
+    
+    if (q + 1 == next_d ) or ( q + 1 == next_n ) then
+      f = q
+      tmp_body = tmp_body..string.sub(text, from, q-1)
+      mode = FETCHNG_BODY
+      pos = f + 1
+    else
+      tmp_body = tmp_body..string.sub(text, from, q)
+      pos = f + 1
+    end
   end
 end
 
@@ -133,19 +147,61 @@ function find_by(self, name, key)
   end
 end
 
+function index(self, index)
+  return wrap(self.rows[index], self.keys)
+end
+
+function first(self)
+  return self:index(1)
+end
+
+function last(self)
+  return self:index(self.length)
+end
+
+function rewind(self)
+  self.pos = 0
+end
+
+function has_next(self)
+  if self.pos + 1 <= self.length then
+    self.pos = self.pos + 1
+    return true
+  else
+    self:rewind()
+    return false
+  end
+end
+
+function value(self)
+  return self:index(self.pos)
+end
+
+function load_from_file(file_name)
+  local f = io.open(file_name)
+  if f == nil then
+    io.write("Error: no sush file:"..file_name.."\n")
+    return false
+  end
+  
+  local text = f:read("*a")
+
+  return load(text)
+end
+
 function load( text )
   -- initialize
   mode = FETCHNG_TITLE
-  rows = {}
+  local rows = {}
+  local titles = {}
   line = {}
-  titles = {}
   column = 1
   pos = 1
   after_delimiter = false
   tmp_body = ""
   
   while true do
-    if seek(text) == false then
+    if seek(text, titles, rows) == false then
       break
     end
   end
@@ -157,8 +213,13 @@ function load( text )
     length=#rows,
     index_sorted={},
     find_by=find_by,
-    first=wrap(rows[1], titles),
-    last=wrap(rows[#rows],titles),
+    first=first,
+    last=last,
+    index=index,
+    has_next=has_next,
+    value=value,
+    rewind=rewind,
+    pos=0,
   }
 end
  
