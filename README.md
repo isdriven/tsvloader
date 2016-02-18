@@ -41,3 +41,5 @@ usage: in Japanese
   - キーで検索できる
   - キーでデータを参照できる
   - while loop で回すことができる
+
+
