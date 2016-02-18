@@ -28,7 +28,7 @@ function seek(text, titles, rows)
   local text_len = #text
   if from >= #text then
     if titles[column] ~= nil then
-      line[titles[column]] = table.concat({tmp_body,ret_body},"")
+      line[titles[column]] = refine(table.concat({tmp_body,ret_body},""))
     end
     table.insert(rows, line)
     return false 
@@ -65,7 +65,7 @@ function seek(text, titles, rows)
   elseif mode == FETCHNG_BODY then
     if f == d then
       if titles[column] ~= nil then
-	line[titles[column]] = table.concat({tmp_body,ret_body},"")
+	line[titles[column]] = refine(table.concat({tmp_body,ret_body},""))
 	tmp_body = ""
 	column = column + 1
 	if f + 1 == q then
@@ -78,7 +78,7 @@ function seek(text, titles, rows)
 	return false
       end
       if titles[column] ~= nil then
-	line[titles[column]] = table.concat({tmp_body,ret_body},"")
+	line[titles[column]] = refine(table.concat({tmp_body,ret_body},""))
       end
       tmp_body = ""
       column = 1
@@ -103,6 +103,10 @@ function seek(text, titles, rows)
       pos = f + 1
     end
   end
+end
+
+function refine(text)
+  return string.gsub(text,'""', '"')
 end
 
 function dump(self)
